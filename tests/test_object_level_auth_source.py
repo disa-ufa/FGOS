@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import ast
 from pathlib import Path
@@ -39,5 +39,6 @@ def test_bot_api_client_passes_chat_id_to_job_endpoint():
 def test_smoke_and_ci_use_chat_scoped_job_endpoint():
     smoke = _read("scripts/smoke_test.ps1")
     ci = _read("scripts/ci_smoke.py")
-    assert '/v1/jobs/$jobId?chat_id=$ChatId' in smoke
+    assert '/v1/jobs/${jobId}?chat_id=$ChatId' in smoke
     assert '/v1/jobs/{job_id}?chat_id={chat_id}' in ci
+
