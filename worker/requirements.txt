@@ -1,0 +1,12 @@
+celery==5.4.0
+redis==5.0.8
+SQLAlchemy==2.0.37
+psycopg2-binary==2.9.9
+pydantic==2.10.6
+pydantic-settings==2.7.1
+reportlab==4.2.5
+python-docx==1.1.2
+pypdf==4.3.1
+
+# Observability (P0)
+sentry-sdk==2.18.0

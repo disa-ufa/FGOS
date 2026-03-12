@@ -1,0 +1,8 @@
+pytest
+requests
+python-docx
+SQLAlchemy
+pydantic
+pydantic-settings
+reportlab
+pypdf

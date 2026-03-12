@@ -1,0 +1,81 @@
+services:
+  postgres:
+    # Use Public ECR mirror to reduce flaky pulls from Docker Hub CDN.
+    image: public.ecr.aws/docker/library/postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-fgos}
+      POSTGRES_USER: ${POSTGRES_USER:-fgos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fgos}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-fgos} -d $${POSTGRES_DB:-fgos}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    # Use Public ECR mirror to reduce flaky pulls from Docker Hub CDN.
+    image: public.ecr.aws/docker/library/redis:7
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    # IMPORTANT:
+    # Use env_file as the single source of truth. This avoids subtle issues where
+    # Compose variable-substitution produces empty/incorrect values inside containers.
+    env_file: .env
+    volumes:
+      - ./data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    env_file: .env
+    volumes:
+      - ./data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["celery", "-A", "worker.celery_app", "worker", "--loglevel=INFO"]
+    restart: unless-stopped
+
+  bot:
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    env_file: .env
+    depends_on:
+      api:
+        condition: service_started
+    # IMPORTANT:
+    # Do NOT hardcode public DNS here by default.
+    # In many networks, 8.8.8.8/1.1.1.1 may be blocked from containers -> Telegram DNS fails.
+    # Let Docker use the host DNS settings (default) unless you *know* you need overrides.
+    restart: unless-stopped
+
+volumes:
+  pgdata:

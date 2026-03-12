@@ -1,0 +1,472 @@
+{
+  "version": "noo_v1",
+  "level": "NOO",
+  "title": "Анализ конспекта урока по ФГОС НОО (MVP)",
+  "scoring": {
+    "scale": [
+      0,
+      1,
+      2
+    ],
+    "meaning": {
+      "0": "не обнаружено в тексте / не подтверждено",
+      "1": "частично / низкая уверенность / без явного подтверждения",
+      "2": "обнаружено и подтверждено доказательствами"
+    },
+    "confidence_thresholds": {
+      "low": 0.55,
+      "high": 0.78
+    }
+  },
+  "criteria": [
+    {
+      "criterion_id": "META_CORE",
+      "group": "META",
+      "title": "Паспорт урока (минимум)",
+      "description": "Тема, тип урока, класс/учитель (если есть).",
+      "check_type": "rule",
+      "weight": 1,
+      "rule": {
+        "required_fields_any": [
+          "meta.topic",
+          "meta.lesson_type",
+          "meta.class_grade",
+          "meta.teacher"
+        ],
+        "min_present": 2
+      },
+      "hints": [
+        "Укажите тему и тип урока (это помогает проверке структуры)."
+      ]
+    },
+    {
+      "criterion_id": "DIDACTIC_TASK_ALIGNMENT",
+      "group": "DIDACTIC_TASK",
+      "title": "Соответствие дидактической задачи отобранному содержанию",
+      "description": "Соответствие дидактической задачи урока отобранному содержанию.",
+      "check_type": "rule",
+      "weight": 3,
+      "rule": {
+        "required_fields_any": [
+          "didactic_task.value",
+          "goals[0].value",
+          "tasks[0].value"
+        ],
+        "keywords_any": [
+          "дидактическ",
+          "задача урока",
+          "цель урока",
+          "задачи урока",
+          "планируемые результаты"
+        ],
+        "needs_evidence": true
+      },
+      "hints": [
+        "Свяжите дидактическую задачу с конкретным содержанием (что именно изучаем/формируем)."
+      ]
+    },
+    {
+      "criterion_id": "DIDACTIC_TASK_RESULTIVITY",
+      "group": "DIDACTIC_TASK",
+      "title": "Результативность решения дидактической задачи",
+      "description": "Есть ли в конспекте признаки достижения/проверки результата по дидактической задаче.",
+      "check_type": "rule",
+      "weight": 3,
+      "rule": {
+        "required_fields_any": [
+          "assessment",
+          "stages[].assessment",
+          "stages[].assignments"
+        ],
+        "keywords_any": [
+          "провер",
+          "контроль",
+          "оцен",
+          "критер",
+          "самооцен",
+          "рефлекс",
+          "итог"
+        ],
+        "needs_evidence": true
+      },
+      "hints": [
+        "Добавьте способ фиксации результата: критерии, контроль, мини-итог, рефлексия."
+      ]
+    },
+    {
+      "criterion_id": "CONTENT_ALIGN_PROGRAM",
+      "group": "CONTENT",
+      "title": "Соответствие содержания программе и учебнику",
+      "description": "Соответствие основного содержания урока содержанию программы и учебника.",
+      "check_type": "rule",
+      "weight": 2,
+      "rule": {
+        "required_fields_any": [
+          "meta.umk",
+          "meta.textbook",
+          "meta.program_reference"
+        ],
+        "keywords_any": [
+          "учебник",
+          "умк",
+          "программа",
+          "календарно-тематическ",
+          "ктп"
+        ],
+        "needs_evidence": false
+      },
+      "hints": [
+        "В MVP без КТП система проверяет наличие ссылок на УМК/программу. Сопоставление по темам — в V2."
+      ]
+    },
+    {
+      "criterion_id": "METHODS_ALIGN_GOALS",
+      "group": "METHODS",
+      "title": "Соответствие методов решению триединой цели",
+      "description": "Соответствие приемов обучения и учения решению триединой образовательной цели.",
+      "check_type": "rule",
+      "weight": 2,
+      "rule": {
+        "required_fields_any": [
+          "stages[].methods",
+          "methods_global"
+        ],
+        "keywords_any": [
+          "метод",
+          "прием",
+          "приём",
+          "беседа",
+          "объяснение",
+          "работа в парах",
+          "практическая работа",
+          "игра"
+        ],
+        "needs_evidence": true
+      },
+      "hints": [
+        "Опишите приемы/методы по этапам (что делает учитель/ученики)."
+      ]
+    },
+    {
+      "criterion_id": "FORMS_ALIGN_TASK",
+      "group": "FORMS",
+      "title": "Соответствие форм обучения дидактической задаче",
+      "description": "Фронтальная/групповая/индивидуальная/коллективная — уместность выбора.",
+      "check_type": "rule",
+      "weight": 2,
+      "rule": {
+        "required_fields_any": [
+          "stages[].forms",
+          "forms_global"
+        ],
+        "keywords_any": [
+          "фронтальн",
+          "группов",
+          "индивидуальн",
+          "коллективн",
+          "в парах"
+        ],
+        "needs_evidence": true
+      },
+      "hints": [
+        "Укажите формы работы на ключевых этапах (актуализация, изучение, закрепление, рефлексия)."
+      ]
+    },
+    {
+      "criterion_id": "FORMS_TASKS_APPROPRIATE",
+      "group": "FORMS",
+      "title": "Целесообразность использования предложенных заданий",
+      "description": "Понятно ли, зачем задания и как они ведут к цели/результату.",
+      "check_type": "rule",
+      "weight": 2,
+      "rule": {
+        "required_fields_any": [
+          "stages[].assignments",
+          "assignments_global"
+        ],
+        "keywords_any": [
+          "задание",
+          "упражнение",
+          "задача",
+          "выполн",
+          "практическ"
+        ],
+        "needs_evidence": true
+      },
+      "hints": [
+        "Добавьте формулировки заданий (что именно делают дети)."
+      ]
+    },
+    {
+      "criterion_id": "RESULT_ACHIEVEMENT",
+      "group": "RESULT",
+      "title": "Достижение цели и решение основной дидактической задачи",
+      "description": "Есть ли итог урока/рефлексия/контроль, который подтверждает достижение цели.",
+      "check_type": "rule",
+      "weight": 3,
+      "rule": {
+        "required_fields_any": [
+          "reflection",
+          "assessment",
+          "stages[].assessment"
+        ],
+        "keywords_any": [
+          "итог",
+          "рефлекс",
+          "самооцен",
+          "оцен",
+          "контроль",
+          "вывод"
+        ],
+        "needs_evidence": true
+      },
+      "hints": [
+        "Добавьте этап 'итог/рефлексия' и чем он подтверждает цель."
+      ]
+    },
+    {
+      "criterion_id": "PRACTICAL_ORIENTATION",
+      "group": "PRACTICAL",
+      "title": "Практическая направленность",
+      "description": "Практическая направленность вопросов, упражнений и задач.",
+      "check_type": "rule",
+      "weight": 2,
+      "rule": {
+        "required_fields_any": [
+          "stages[].assignments"
+        ],
+        "keywords_any": [
+          "жизненн",
+          "практическ",
+          "примен",
+          "пример из жизни",
+          "ситуаци",
+          "кейс"
+        ],
+        "needs_evidence": true
+      },
+      "hints": [
+        "Добавьте задания на применение знаний в ситуации, близкой к реальной."
+      ]
+    },
+    {
+      "criterion_id": "INDEP_AUTONOMY",
+      "group": "INDEPENDENT_WORK",
+      "title": "Уровень самостоятельности школьников",
+      "description": "Уровень самостоятельности при решении дидактической задачи.",
+      "check_type": "rule",
+      "weight": 2,
+      "rule": {
+        "required_fields_any": [
+          "stages[].assignments",
+          "stages[].student_actions"
+        ],
+        "keywords_any": [
+          "самостоятельн",
+          "индивидуально",
+          "самопровер",
+          "по образцу",
+          "по алгоритму"
+        ],
+        "needs_evidence": true
+      },
+      "hints": [
+        "Отметьте, где ученики выполняют работу самостоятельно и как организована проверка."
+      ]
+    },
+    {
+      "criterion_id": "INDEP_CHARACTER",
+      "group": "INDEPENDENT_WORK",
+      "title": "Характер самостоятельной деятельности",
+      "description": "Репродуктивный/творческий характер самостоятельной деятельности.",
+      "check_type": "rule",
+      "weight": 1,
+      "rule": {
+        "keywords_any": [
+          "репродуктив",
+          "творческ",
+          "проект",
+          "исследован",
+          "составь",
+          "придумай"
+        ],
+        "needs_evidence": true
+      },
+      "hints": [
+        "Отразите, где есть творческий элемент (выбор способа, собственный пример, мини-проект)."
+      ]
+    },
+    {
+      "criterion_id": "INDEP_HELP",
+      "group": "INDEPENDENT_WORK",
+      "title": "Взаимопомощь",
+      "description": "Организация взаимопомощи / сотрудничества.",
+      "check_type": "rule",
+      "weight": 1,
+      "rule": {
+        "keywords_any": [
+          "взаимопомощ",
+          "в парах",
+          "в группе",
+          "взаимопровер",
+          "обсудите"
+        ],
+        "needs_evidence": true
+      },
+      "hints": [
+        "Добавьте элемент взаимопроверки/работы в парах или групповое обсуждение."
+      ]
+    },
+    {
+      "criterion_id": "UUD_FORMATION",
+      "group": "UUD",
+      "title": "Формирование УУД на этапах урока",
+      "description": "Личностные, познавательные, коммуникативные, регулятивные УУД.",
+      "check_type": "rule",
+      "weight": 3,
+      "rule": {
+        "required_fields_any": [
+          "stages[].uuds",
+          "uuds_global"
+        ],
+        "keywords_any": [
+          "личностн",
+          "познавательн",
+          "коммуникативн",
+          "регулятивн",
+          "уууд",
+          "уувд",
+          "ууд"
+        ],
+        "needs_evidence": true
+      },
+      "hints": [
+        "Лучше указать УУД явно хотя бы на 2–3 этапах."
+      ]
+    },
+    {
+      "criterion_id": "ICT_COMPETENCE",
+      "group": "ICT",
+      "title": "Формирование ИКТ-компетентности",
+      "description": "Применение ИКТ на уроке и уровень сформированности ИКТ-компетентности.",
+      "check_type": "rule",
+      "weight": 2,
+      "rule": {
+        "required_fields_any": [
+          "stages[].ict",
+          "ict_global"
+        ],
+        "keywords_any": [
+          "презентац",
+          "интерактивн",
+          "онлайн",
+          "платформ",
+          "видео",
+          "проектор",
+          "компьютер",
+          "планшет",
+          "икт"
+        ],
+        "needs_evidence": true
+      },
+      "hints": [
+        "Укажите, где и зачем используется ИКТ (демонстрация, тренажёр, проверка)."
+      ]
+    },
+    {
+      "criterion_id": "LESSON_STRUCTURE",
+      "group": "STRUCTURE",
+      "title": "Структура урока",
+      "description": "Соответствие структуры урока основной дидактической задаче.",
+      "check_type": "rule",
+      "weight": 3,
+      "rule": {
+        "required_fields_any": [
+          "stages"
+        ],
+        "min_stage_count": 4,
+        "keywords_any": [
+          "этап",
+          "ход урока",
+          "организацион",
+          "актуализац",
+          "изучение",
+          "закреплен",
+          "рефлекс",
+          "итог"
+        ],
+        "needs_evidence": true
+      },
+      "hints": [
+        "Если этапы не подписаны, система попытается восстановить их по смыслу."
+      ]
+    },
+    {
+      "criterion_id": "PEDAGOGICAL_STYLE",
+      "group": "STYLE",
+      "title": "Педагогический стиль",
+      "description": "Соблюдение норм педагогической этики.",
+      "check_type": "rule",
+      "weight": 1,
+      "rule": {
+        "keywords_any": [
+          "уваж",
+          "корректн",
+          "поддерж",
+          "безопасн",
+          "доброжелат"
+        ],
+        "needs_evidence": false
+      },
+      "hints": [
+        "В MVP оцениваем мягко: если нет маркеров — ставим 1, а не 0."
+      ],
+      "defaults": {
+        "if_no_evidence_score": 1
+      }
+    },
+    {
+      "criterion_id": "HYGIENE_REQUIREMENTS",
+      "group": "HYGIENE",
+      "title": "Гигиенические требования",
+      "description": "Физминутки/динамические паузы/гимнастика для глаз/чередование деятельности.",
+      "check_type": "rule",
+      "weight": 2,
+      "rule": {
+        "keywords_any": [
+          "физминут",
+          "динамическ",
+          "гимнастика для глаз",
+          "проветр",
+          "чередован",
+          "санитар"
+        ],
+        "needs_evidence": true
+      },
+      "hints": [
+        "Добавьте физминутку/динамическую паузу и/или отметьте чередование видов деятельности."
+      ]
+    },
+    {
+      "criterion_id": "CONCLUSIONS_RECOMMENDATIONS",
+      "group": "SUMMARY",
+      "title": "Выводы и рекомендации",
+      "description": "Наличие блока выводов/рекомендаций (если есть самоанализ).",
+      "check_type": "rule",
+      "weight": 1,
+      "rule": {
+        "keywords_any": [
+          "вывод",
+          "рекомендац"
+        ],
+        "needs_evidence": false
+      },
+      "hints": [
+        "Не обязательно для каждого конспекта, но полезно для методической работы."
+      ],
+      "defaults": {
+        "if_no_evidence_score": 1
+      }
+    }
+  ]
+}

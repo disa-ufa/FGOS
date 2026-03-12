@@ -1,0 +1,11 @@
+services:
+  bot:
+    # By default, do NOT force public DNS servers which may be blocked.
+    # Use Docker embedded DNS (127.0.0.11) unless you explicitly override.
+    dns:
+      - ${BOT_DNS1:-127.0.0.11}
+      - ${BOT_DNS2:-127.0.0.11}
+
+  api:
+    ports:
+      - "18000:8000"
