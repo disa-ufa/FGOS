@@ -8,3 +8,16 @@ data/
 .venv/
 __pycache__/
 *.pyc
+
+# local artifacts / scratch files
+*.zip
+artifacts_raw.json
+report_downloaded.pdf
+report_noo_downloaded.pdf
+bad.pdf
+big.pdf
+blank.pdf
+text.pdf
+README_PR*.md
+PR*_README.txt
+Новый текстовый документ.txt
