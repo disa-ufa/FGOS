@@ -21,3 +21,7 @@ COPY shared /app/shared
 
 CMD ["celery", "-A", "worker.celery_app", "worker", "--loglevel=INFO"]
 
+RUN useradd -m -u 10001 appuser && mkdir -p /data && chown -R appuser:appuser /app /data
+USER appuser
+
+
