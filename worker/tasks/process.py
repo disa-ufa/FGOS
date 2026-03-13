@@ -7,7 +7,7 @@ import json
 import os
 import uuid
 import re
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
@@ -107,7 +107,7 @@ def _coerce_uuid(value: object) -> uuid.UUID | None:
 def _update_job(db, job: models.Job, **kwargs) -> None:
     for k, v in kwargs.items():
         setattr(job, k, v)
-    job.updated_at = datetime.utcnow()
+    job.updated_at = datetime.now(UTC)
     db.add(job)
     db.commit()
 
@@ -201,7 +201,7 @@ def _parse_docx_to_canonical(docx_path: Path) -> Dict[str, Any]:
             "paragraphs_total": sum(1 for b in blocks if b["block_id"].startswith("p")),
             "tables_total": sum(1 for b in blocks if b["block_id"].startswith("t")),
         },
-        "created_at": datetime.utcnow().isoformat() + "Z",
+        "created_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
     }
 
 
@@ -216,7 +216,7 @@ def _upsert_artifact(
 ) -> models.Artifact:
     p = Path(storage_path)
     size_bytes = p.stat().st_size
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     existing = (
         db.query(models.Artifact)
         .filter(
@@ -318,7 +318,7 @@ def process_document(self, job_id: str):
                     }
                 ],
                 "stats": {"blocks_total": 1, "paragraphs_total": 1, "tables_total": 0},
-                "created_at": datetime.utcnow().isoformat() + "Z",
+                "created_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
             }
 
         t_parse_ms = (time.perf_counter() - t_parse0) * 1000.0
@@ -394,14 +394,14 @@ def process_document(self, job_id: str):
         )
         if prev:
             prev.canonical_json = json.dumps(canonical, ensure_ascii=False)
-            prev.created_at = datetime.utcnow()
+            prev.created_at = datetime.now(UTC)
             db.add(prev)
         else:
             extr = models.Extraction(
                 doc_id=doc.id,
                 version=1,
                 canonical_json=json.dumps(canonical, ensure_ascii=False),
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(UTC),
             )
             db.add(extr)
         db.commit()
@@ -492,7 +492,7 @@ def process_document(self, job_id: str):
             chk.results_json = json.dumps(results_payload, ensure_ascii=False)
             chk.total_score = str(results_payload.get("total_score", 0.0))
             chk.max_score = str(results_payload.get("max_score", 0.0))
-            chk.created_at = datetime.utcnow()
+            chk.created_at = datetime.now(UTC)
             db.add(chk)
         else:
             chk = models.Check(
@@ -501,7 +501,7 @@ def process_document(self, job_id: str):
                 results_json=json.dumps(results_payload, ensure_ascii=False),
                 total_score=str(results_payload.get("total_score", 0.0)),
                 max_score=str(results_payload.get("max_score", 0.0)),
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(UTC),
             )
             db.add(chk)
         db.commit()
