@@ -11,3 +11,4 @@ redis==5.0.4
 
 # Used by api/scripts/ensure_migrations.py
 alembic==1.13.3
+prometheus-client==0.20.0

@@ -29,6 +29,7 @@ from worker.config import settings
 from worker.observability.logging import setup_logging as setup_worker_logging
 
 from worker.observability.request_id import set_request_id, reset_request_id
+from worker.observability.metrics import inc_job_status, observe_job_duration, observe_stage
 from api.db.base import Base
 from api.db import models
 from api.storage.local import ensure_dir, path_for_artifacts
@@ -293,6 +294,7 @@ def process_document(self, job_id: str):
         ensure_dir(artifacts_dir)
 
         logger.info("process_document: start job=%s doc=%s mime=%s", job_uuid, doc.id, doc.mime_type)
+        t_job0 = time.perf_counter()
 
         # -----------------
         # Stage: parse -> canonical
@@ -322,6 +324,7 @@ def process_document(self, job_id: str):
             }
 
         t_parse_ms = (time.perf_counter() - t_parse0) * 1000.0
+        observe_stage("parse", t_parse_ms / 1000.0)
         blocks_total = int((canonical.get("stats") or {}).get("blocks_total") or 0)
         pages_total = int((canonical.get("stats") or {}).get("pages_total") or 0)
         text_chars_total = int((canonical.get("stats") or {}).get("text_chars_total") or 0)
@@ -381,6 +384,7 @@ def process_document(self, job_id: str):
         else:
             extracted = extract_noo_from_canonical(canonical)
         t_extract_ms = (time.perf_counter() - t_extract0) * 1000.0
+        observe_stage("extract", t_extract_ms / 1000.0)
         logger.info("process_document: extracted fields (%.1fms)", t_extract_ms)
         extracted_path = artifacts_dir / "extracted_noo.json"
         atomic_write_text(extracted_path, json.dumps(extracted, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -467,6 +471,7 @@ def process_document(self, job_id: str):
             results_payload = evaluate_noo_rubric(rubric=rubric, canonical=canonical, extracted=extracted)
 
         t_rules_ms = (time.perf_counter() - t_rules0) * 1000.0
+        observe_stage("rules", t_rules_ms / 1000.0)
         logger.info(
             "process_document: rules total_score=%s/%s (%.1fms)",
             results_payload.get("total_score"),
@@ -525,6 +530,7 @@ def process_document(self, job_id: str):
         )
         os.replace(report_tmp, report_path)
         t_report_ms = (time.perf_counter() - t_report0) * 1000.0
+        observe_stage("report", t_report_ms / 1000.0)
         try:
             size = report_path.stat().st_size
         except Exception:
@@ -569,6 +575,7 @@ def process_document(self, job_id: str):
             db.commit()
 
             t_highlight_ms = (time.perf_counter() - t_highlight0) * 1000.0
+            observe_stage("highlight", t_highlight_ms / 1000.0)
             logger.info(
                 "process_document: highlighted DOCX generated blocks=%s par_runs=%s tbl_runs=%s (%.1fms)",
                 highlight_stats.get("blocks_marked"),
@@ -578,6 +585,9 @@ def process_document(self, job_id: str):
             )
 
         logger.info("process_document: DONE job=%s", job_uuid)
+        t_job_ms = (time.perf_counter() - t_job0) * 1000.0
+        inc_job_status("DONE")
+        observe_job_duration("DONE", t_job_ms / 1000.0)
         _update_job(db, job, status=models.JobStatus.DONE, progress=100, error_message=None)
     except Exception as e:
         # Retry with exponential-ish backoff. Mark FAILED only when giving up.
@@ -596,6 +606,9 @@ def process_document(self, job_id: str):
                 if will_retry:
                     _update_job(db, job, status=models.JobStatus.RUNNING, error_message=msg)
                 else:
+                    t_job_ms = (time.perf_counter() - t_job0) * 1000.0
+                    inc_job_status("FAILED")
+                    observe_job_duration("FAILED", t_job_ms / 1000.0)
                     _update_job(db, job, status=models.JobStatus.FAILED, progress=100, error_message=msg)
             except Exception:
                 pass
