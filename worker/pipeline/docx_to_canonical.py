@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
@@ -88,6 +88,6 @@ def parse_docx_to_canonical(docx_path: Path) -> Dict[str, Any]:
             "paragraphs_total": sum(1 for b in blocks if b["block_id"].startswith("p")),
             "tables_total": sum(1 for b in blocks if b["block_id"].startswith("t")),
         },
-        "created_at": datetime.utcnow().isoformat() + "Z",
+        "created_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
     }
 

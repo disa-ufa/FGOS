@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Dict, Iterable, Optional, Tuple
 
@@ -140,7 +140,7 @@ def highlight_docx_copy(
             blocks_marked += 1
 
     if add_legend:
-        ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+        ts = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
         legend = (
             f"FGOS Helper: подсветка замечаний ({ts}). "
             "Красным — критично (0/2), жёлтым — частично (1/2)."
