@@ -112,3 +112,12 @@ volumes:
 - Verify the same flow on Linux/VPS deployment
 - Optionally add a compact architecture diagram / component overview
 - Optionally add a release checklist for future changes
+
+## Release checklist
+
+Before pushing changes, verify the following:
+
+### Code and tests
+- Run local tests:
+  ```powershell
+  python -m pytest -q
