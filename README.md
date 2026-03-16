@@ -68,3 +68,11 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke_test.ps1 `
 ```
 GET /v1/bot/jobs/{job_id}?chat_id=...   (service-auth)
 ```
+
+## Observability
+
+### API metrics
+Prometheus-метрики API доступны по адресу:
+
+```text
+http://127.0.0.1:18000/metrics
