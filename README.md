@@ -76,3 +76,39 @@ Prometheus-метрики API доступны по адресу:
 
 ```text
 http://127.0.0.1:18000/metrics
+
+## Known limitations
+
+### Non-root worker on Windows bind mounts
+A non-root worker mode was explored, but it is **not** considered a supported local setup on Windows.
+
+When Docker uses a Windows bind mount such as:
+
+```yaml
+volumes:
+  - ./data:/data
+
+  ## Project status
+
+### Closed
+- Secret handling stabilized (`.env` is not tracked, `.env.example` is used as template)
+- CI is configured
+- Secret scan is configured
+- Required `HIGHLIGHTED_DOCX` artifact is generated for DOCX inputs
+- Upload → queue → processing → artifact download flow is working
+- Object-level auth checks with `chat_id` are covered by tests
+- Worker timestamps were migrated to timezone-aware UTC
+- API metrics endpoint is working
+- Worker metrics endpoint is working in Celery `prefork` mode
+- Local Windows smoke test flow is stable
+
+### Partial
+- Non-root worker mode was investigated
+- Production-style override was explored
+- The limitation is understood, but the solution is not yet considered production-ready for Windows bind mounts
+
+### Remaining
+- Revisit non-root worker in a Linux-safe storage/volume setup
+- Verify the same flow on Linux/VPS deployment
+- Optionally add a compact architecture diagram / component overview
+- Optionally add a release checklist for future changes
